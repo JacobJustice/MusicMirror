@@ -1,6 +1,9 @@
 spotify.json
 telegram_token.json
 
+mm.log
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

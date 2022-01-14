@@ -11,6 +11,7 @@ Press Ctrl-C on the command line or send a signal to the process to stop the bot
 import logging
 import sys
 import json
+import time
 
 from telegram import Update, ForceReply
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
@@ -21,7 +22,13 @@ import spotipy as util
 
 # Enable logging
 logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
+    format='%(levelname)s:%(asctime)s - %(name)s - %(message)s',
+    level=logging.INFO,
+    handlers=[
+        logging.FileHandler('mm.log'),
+        logging.StreamHandler(sys.stdout)
+    ]
+
 )
 
 logger = logging.getLogger(__name__)
@@ -74,6 +81,7 @@ def generate_reply(track_dict):
             artist_names += ', ' + artist['name']
     track_name = track_dict['name']
     reply = artist_names + " - " + track_name + '\n\n' + image_url
+    logging.info(artist_names + ', ' + track_name + ', ' + image_url)
     return reply
 
 
