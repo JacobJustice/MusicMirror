@@ -79,6 +79,13 @@ def generate_reply(track_dict):
 
 def reply_with_track_info(update: Update, context: CallbackContext) -> None:
     if contains_spotify_link(update.message.text):
+        spot_token = util.prompt_for_user_token(username,
+                                           scope,
+                                           client_id=spotify_cred['id'],
+                                           client_secret=spotify_cred['secret'],
+                                           redirect_uri=spotify_cred['redirect'])
+        sp = spotipy.Spotify(auth=spot_token)
+
         track_dict = sp.track(track_id := extract_track_id(update.message.text))
         update.message.reply_text(generate_reply(track_dict))
 
@@ -100,23 +107,22 @@ with open('./telegram_token.json') as f_t:
 spotify_cred = None
 with open('./spotify.json') as f_s:
     spotify_cred = json.load(f_s)
-print(spotify_cred)
 username = spotify_cred['username']
 playlist_id = spotify_cred['playlist']
 
 scope = 'playlist-modify-public playlist-modify-private'
-spot_token = util.prompt_for_user_token(username,
-                                   scope,
-                                   client_id=spotify_cred['id'],
-                                   client_secret=spotify_cred['secret'],
-                                   redirect_uri=spotify_cred['redirect'])
-
-if spot_token:
-    print('TOKEN',spot_token)
-    sp = spotipy.Spotify(auth=spot_token)
-else:
-    print("Couldn't get token for",username)
-    sys.exit()
+#spot_token = util.prompt_for_user_token(username,
+#                                   scope,
+#                                   client_id=spotify_cred['id'],
+#                                   client_secret=spotify_cred['secret'],
+#                                   redirect_uri=spotify_cred['redirect'])
+#
+#if spot_token:
+#    print('TOKEN',spot_token)
+#    sp = spotipy.Spotify(auth=spot_token)
+#else:
+#    print("Couldn't get token for",username)
+#    sys.exit()
 
 # Create the Updater and pass it your bot's token.
 updater = Updater(tel_token)
@@ -133,6 +139,8 @@ dispatcher.add_handler(MessageHandler(Filters.entity('url') & ~Filters.command, 
 
 # Start the Bot
 updater.start_polling()
+
+print("\n\n\t\tMusicMirror Started!\n\n")
 
 # Run the bot until you press Ctrl-C or the process receives SIGINT,
 # SIGTERM or SIGABRT. This should be used most of the time, since
