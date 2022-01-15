@@ -80,9 +80,8 @@ def generate_reply(track_dict):
         else:
             artist_names += ', ' + artist['name']
     track_name = track_dict['name']
-    reply = artist_names + " - " + track_name + '\n\n' + image_url
-    logging.info(artist_names + ', ' + track_name + ', ' + image_url)
-    return reply
+    reply = artist_names + " - " + track_name
+    return reply, image_url
 
 
 def reply_with_track_info(update: Update, context: CallbackContext) -> None:
@@ -95,7 +94,16 @@ def reply_with_track_info(update: Update, context: CallbackContext) -> None:
         sp = spotipy.Spotify(auth=spot_token)
 
         track_dict = sp.track(track_id := extract_track_id(update.message.text))
-        update.message.reply_text(generate_reply(track_dict))
+        reply, image_url = generate_reply(track_dict)
+        if update.message.from_user.username != None:
+            logging.info(str(update.message.from_user.id) + ':' + update.message.from_user.username + '; ' + reply + ', ' + image_url)
+        else:
+            logging.info(str(update.message.from_user.id) + ';' + reply + ', ' + image_url)
+
+
+        reply += '\n\n' + image_url
+
+        update.message.reply_text(reply)
 
         # remove all occurences of the track
         sp.user_playlist_remove_all_occurrences_of_tracks(username, playlist_id,[track_id])
