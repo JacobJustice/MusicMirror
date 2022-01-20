@@ -33,24 +33,7 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
-def extract_track_id(text):
-    url_ind = text.find("https://open.spotify.com/track/")
 
-    # cut everything before the url
-    track_url = text[url_ind:]
-
-    # cut everything after the track_url if there is anything after the track_url
-    if track_url.find(' ') != -1:
-        track_url = track_url[:track_url.find(' ')]
-
-    # cut everything before /track/ and after the ? (inclusive)
-    track_id = track_url[track_url.find('/track/')+len('/track/'):track_url.find('?')]
-
-    return track_id
-
-
-# Define a few command handlers. These usually take the two arguments update and
-# context.
 def start(update: Update, context: CallbackContext) -> None:
     """Send a message when the command /start is issued."""
     update.message.reply_text("""Send a link to a spotify track and I will find the artist, track name, and the album art.
@@ -63,12 +46,32 @@ def help_command(update: Update, context: CallbackContext) -> None:
             \nI will also add the track to this spotify playlist: https://open.spotify.com/playlist/"""+playlist_id)
 
 
-def echo(update: Update, context: CallbackContext) -> None:
-    """Echo the user message."""
-    if contains_spotify_link(update.message.text):
-        update.message.reply_text('TRUE')
+# if the substring isn't found, return length of string
+def find_wrap(string, substring):
+    find_val = string.find(substring)
+    if find_val < 0:
+        return len(string)
     else:
-        update.message.reply_text('FALSE')
+        return find_val 
+
+
+def extract_track_id(text):
+    url_ind = text.find("https://open.spotify.com/track/")
+
+    # cut everything before the url
+    track_url = text[url_ind:]
+
+    # cut everything after the track_url if there is anything after the track_url
+    if track_url.find(' ') != -1:
+        track_url = track_url[:track_url.find(' ')]
+
+    # cut everything before /track/ and after the ? (inclusive)
+    track_id = track_url[track_url.find('/track/')+len('/track/'):find_wrap(track_url,'?')]
+
+    print(track_url)
+    print(track_id)
+
+    return track_id, '?' in track_url
 
 
 def generate_reply(track_dict):
@@ -93,17 +96,18 @@ def reply_with_track_info(update: Update, context: CallbackContext) -> None:
                                            redirect_uri=spotify_cred['redirect'])
         sp = spotipy.Spotify(auth=spot_token)
 
-        track_dict = sp.track(track_id := extract_track_id(update.message.text))
+        track_id, long_link = extract_track_id(update.message.text)
+        track_dict = sp.track(track_id)
         reply, image_url = generate_reply(track_dict)
         if update.message.from_user.username != None:
             logging.info(str(update.message.from_user.id) + ':' + update.message.from_user.username + '; ' + reply + ', ' + image_url)
         else:
             logging.info(str(update.message.from_user.id) + ';' + reply + ', ' + image_url)
 
-
         reply += '\n\n' + image_url
 
-        update.message.reply_text(reply)
+        if long_link:
+            update.message.reply_text(reply)
 
         # remove all occurences of the track
         sp.user_playlist_remove_all_occurrences_of_tracks(username, playlist_id,[track_id])
@@ -113,6 +117,7 @@ def reply_with_track_info(update: Update, context: CallbackContext) -> None:
 
 def contains_spotify_link(text):
     return "https://open.spotify.com/track/" in text
+
 
 """Start the bot."""
 # Load telegram bot token
