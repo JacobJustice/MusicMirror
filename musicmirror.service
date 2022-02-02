@@ -1,0 +1,11 @@
+[Unit]
+Description=Mirror music from the music chat to the spotify playlst
+After=network.target
+
+[Service]
+User=andrew
+Type=simple
+ExecStart=/home/andrew/MusicMirror/venv/bin/python3 /home/andrew/MusicMirror/musicmirror.py
+
+[Install]
+WantedBy=default.target

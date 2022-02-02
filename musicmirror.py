@@ -121,12 +121,12 @@ def contains_spotify_link(text):
 
 """Start the bot."""
 # Load telegram bot token
-with open('./telegram_token.json') as f_t:
+with open('/home/andrew/MusicMirror/telegram_token.json') as f_t:
     tel_token = json.load(f_t)['token']
 
 # Load spotify credentials
 spotify_cred = None
-with open('./spotify.json') as f_s:
+with open('/home/andrew/MusicMirror/spotify.json') as f_s:
     spotify_cred = json.load(f_s)
 username = spotify_cred['username']
 playlist_id = spotify_cred['playlist']
