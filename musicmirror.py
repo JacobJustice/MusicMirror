@@ -112,7 +112,7 @@ def reply_with_track_info(update: Update, context: CallbackContext) -> None:
         # remove all occurences of the track
         sp.user_playlist_remove_all_occurrences_of_tracks(username, playlist_id,[track_id])
         # add the track
-        results = sp.user_playlist_add_tracks(username, playlist_id, [track_id])
+        results = sp.user_playlist_add_tracks(username, playlist_id, [track_id],position=0)
 
 
 def contains_spotify_link(text):
