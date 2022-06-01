@@ -106,8 +106,8 @@ def reply_with_track_info(update: Update, context: CallbackContext) -> None:
 
         reply += '\n\n' + image_url
 
-        if long_link:
-            update.message.reply_text(reply)
+        #if long_link:
+        #    update.message.reply_text(reply)
 
         # remove all occurences of the track
         sp.user_playlist_remove_all_occurrences_of_tracks(username, playlist_id,[track_id])
