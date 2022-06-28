@@ -45,6 +45,15 @@ def help_command(update: Update, context: CallbackContext) -> None:
     update.message.reply_text("""Send a link to a spotify track and I will find the artist, track name, and the album art.
             \nI will also add the track to this spotify playlist: https://open.spotify.com/playlist/"""+playlist_id)
 
+def toggle_thumbnail(update: Update, context: CallbackContext) -> None:
+    global thumbnail
+    if thumbnail is False:
+        thumbnail = True
+        update.message.reply_text("Turning thumbnail replies on!")
+    else:
+        thumbnail = False
+        update.message.reply_text("Turning thumbnail replies off!")
+
 
 # if the substring isn't found, return length of string
 def find_wrap(string, substring):
@@ -106,8 +115,8 @@ def reply_with_track_info(update: Update, context: CallbackContext) -> None:
 
         reply += '\n\n' + image_url
 
-        #if long_link:
-        #    update.message.reply_text(reply)
+        if long_link and thumbnail:
+            update.message.reply_text(reply)
 
         # remove all occurences of the track
         sp.user_playlist_remove_all_occurrences_of_tracks(username, playlist_id,[track_id])
@@ -123,12 +132,12 @@ def contains_spotify_link(text):
 
 """Start the bot."""
 # Load telegram bot token
-with open('/home/andrew/MusicMirror/telegram_token.json') as f_t:
+with open('./telegram_token.json') as f_t:
     tel_token = json.load(f_t)['token']
 
 # Load spotify credentials
 spotify_cred = None
-with open('/home/andrew/MusicMirror/spotify.json') as f_s:
+with open('./spotify.json') as f_s:
     spotify_cred = json.load(f_s)
 username = spotify_cred['username']
 playlist_id = spotify_cred['playlist']
@@ -147,6 +156,8 @@ scope = 'playlist-modify-public playlist-modify-private'
 #    print("Couldn't get token for",username)
 #    sys.exit()
 
+thumbnail = False
+
 # Create the Updater and pass it your bot's token.
 updater = Updater(tel_token)
 
@@ -156,7 +167,7 @@ dispatcher = updater.dispatcher
 # on different commands - answer in Telegram
 dispatcher.add_handler(CommandHandler("start", start))
 dispatcher.add_handler(CommandHandler("help", help_command))
-
+dispatcher.add_handler(CommandHandler("toggle_thumbnail", toggle_thumbnail))
 # on non command i.e message - echo the message on Telegram
 dispatcher.add_handler(MessageHandler(Filters.entity('url') & ~Filters.command, reply_with_track_info))
 
