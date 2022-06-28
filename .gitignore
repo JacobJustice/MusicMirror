@@ -1,6 +1,8 @@
 spotify.json
 telegram_token.json
 
+*.jpg
+
 .cache*
 
 mm.log
